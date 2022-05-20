@@ -81,10 +81,10 @@ contract FlashRedeem is IERC3156FlashBorrowerUpgradeable, IERC721ReceiverUpgrade
         uint256 excessApeNftxTokens = BAYC_NFTX_TOKEN.balanceOf(address(this)) - amount;
         console.log("excessApeNftxTokens: ", excessApeNftxTokens);
 
-        console.log("ETH balance before swap: %s\n", address(this).balance);
+        console.log("ETH balance before swap: ", address(this).balance);
         BAYC_NFTX_TOKEN.approve(SUSHI_ROUTER_ADDR, excessApeNftxTokens);
         sushiRouter.swapExactTokensForETH(excessApeNftxTokens, 0, path, address(this), block.timestamp);
-        console.log("ETH balance after swap: %s\n", address(this).balance);
+        console.log("ETH balance after swap: ", address(this).balance);        
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
@@ -100,6 +100,11 @@ contract FlashRedeem is IERC3156FlashBorrowerUpgradeable, IERC721ReceiverUpgrade
         uint256 _repayment = amount + _fee;
         IERC20Upgradeable(token).approve(address(lender), _allowance + _repayment);
         lender.flashLoan(this, token, amount, new bytes(0));
+        console.log("FlashRedeem ETH balance: ", address(this).balance);                
+        console.log("FlashRedeem ApeCoin token balance: ", APE_COIN_TOKEN.balanceOf(address(this)));
+        console.log("msg.sender",msg.sender);
+        payable(msg.sender).transfer(address(this).balance);
+        APE_COIN_TOKEN.transfer(msg.sender, APE_COIN_TOKEN.balanceOf(address(this)));
     }
 
     // Make contract payable to receive funds
